@@ -178,7 +178,8 @@ function Invoke-VeeamNfcHealthCheck {
         $sshSession = $null
         try {
             $sshSession = New-SSHSession -ComputerName $host.Name -Credential $Credential -ErrorAction Stop
-            $command = "/bin/configstorecli config current get -c esx -g services -k hostd | grep '\"max_memory\"'"
+            # FIX: Simplified the grep pattern to avoid PowerShell parsing errors with nested quotes.
+            $command = "/bin/configstorecli config current get -c esx -g services -k hostd | grep 'max_memory'"
             $sshResult = Invoke-SSHCommand -SSHSession $sshSession -Command $command
             
             $output = $sshResult.Output
