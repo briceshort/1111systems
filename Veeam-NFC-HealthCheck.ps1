@@ -7,7 +7,7 @@
     This script provides a reusable framework for Veeam automation. It handles the core
     requirements of any Veeam PowerShell session and includes a comprehensive health check
     function based on common NFC troubleshooting steps.
-    1. Ensures the Veeam PowerShell Snap-in is loaded.
+    1. Ensures the necessary PowerShell modules are available.
     2. Prompts for the VBR server, a vCenter Cluster, and ESXi host credentials.
     3. Establishes a connection to the specified VBR server.
     4. Runs a detailed health check against the specified cluster and its hosts, including advanced SSH checks.
@@ -217,12 +217,11 @@ function Invoke-VeeamNfcHealthCheck {
 $global:VBRConnection = $null
 
 try {
-    # Step 1: Ensure the Veeam and VMware modules are loaded
-    if (-not (Get-PSSnapin -Name "VeeamPSSnapIn" -ErrorAction SilentlyContinue)) {
-        Write-Log "Veeam PSSnapin not found, attempting to add it."
-        Add-PSSnapin -Name "VeeamPSSnapIn"
-    } else {
-        Write-Log "Veeam PSSnapin is already loaded."
+    # Step 1: Ensure the required modules are available
+    # FIX: Replaced outdated Get-PSSnapin with modern Get-Module for PowerShell 7+ compatibility.
+    if (-not (Get-Module -Name "Veeam.Backup.PowerShell" -ListAvailable)) {
+        Write-Log "Veeam PowerShell module not found. Please ensure the Veeam B&R Console is installed on this machine." -Level ERROR
+        throw "Veeam PowerShell module is required."
     }
     if (-not (Get-Module -Name "VMware.PowerCLI" -ListAvailable)) {
         Write-Log "VMware PowerCLI module not found. Please install it by running 'Install-Module VMware.PowerCLI -Scope CurrentUser'." -Level ERROR
