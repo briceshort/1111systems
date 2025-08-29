@@ -45,8 +45,11 @@ foreach ($server in $servers) {
         # Note: We use 'DEBIAN_FRONTEND=noninteractive' to help prevent prompts from apt.
         # The 'sudo -S' command reads the password from the standard input pipe.
         $prepCommands = @"
-        echo 'Step 1: Running initial package updates and upgrades...'
         export DEBIAN_FRONTEND=noninteractive
+		echo 'Step 1: Removing potentially problematic repository files...'
+        sudo -S rm -f /etc/apt/sources.list.d/saltstack.list
+		
+		echo 'Step 2: Running initial package updates and upgrades...'
         sudo -S apt-get update
         sudo -S apt-get upgrade -y
 
@@ -55,8 +58,7 @@ foreach ($server in $servers) {
         sudo -S apt-get remove --purge lxd snapd -y
         sudo -S apt-get purge lxd lxd-client -y
 
-        echo 'Step 3: Removing potentially problematic repository files...'
-        sudo -S rm -f /etc/apt/sources.list.d/saltstack.list
+        
 
         echo 'Step 4: Reconfiguring any broken packages...'
         sudo -S dpkg --configure -a
